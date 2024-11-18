@@ -20,6 +20,10 @@ from contextlib import asynccontextmanager
 
 # Imports required by the service's model
 # TODO: 1. ADD REQUIRED IMPORTS (ALSO IN THE REQUIREMENTS.TXT)
+import tts_calls
+from pydub import AudioSegment
+from io import BytesIO
+import json
 
 settings = get_settings()
 
@@ -27,7 +31,7 @@ settings = get_settings()
 class MyService(Service):
     # TODO: 2. CHANGE THIS DESCRIPTION
     """
-    My service model
+    test-to-speech application
     """
 
     # Any additional fields must be excluded for Pydantic to work
@@ -37,8 +41,8 @@ class MyService(Service):
     def __init__(self):
         super().__init__(
             # TODO: 3. CHANGE THE SERVICE NAME AND SLUG
-            name="My Service",
-            slug="my-service",
+            name="Test to Speech",
+            slug="text-to-speech",
             url=settings.service_url,
             summary=api_summary,
             description=api_description,
@@ -46,22 +50,21 @@ class MyService(Service):
             # TODO: 4. CHANGE THE INPUT AND OUTPUT FIELDS, THE TAGS AND THE HAS_AI VARIABLE
             data_in_fields=[
                 FieldDescription(
-                    name="image",
+                    name="parameters",
                     type=[
-                        FieldDescriptionType.IMAGE_PNG,
-                        FieldDescriptionType.IMAGE_JPEG,
+                        FieldDescriptionType.APPLICATION_JSON
                     ],
                 ),
             ],
             data_out_fields=[
                 FieldDescription(
-                    name="result", type=[FieldDescriptionType.APPLICATION_JSON]
+                    name="result", type=[FieldDescriptionType.AUDIO_MP3]
                 ),
             ],
             tags=[
                 ExecutionUnitTag(
-                    name=ExecutionUnitTagName.IMAGE_PROCESSING,
-                    acronym=ExecutionUnitTagAcronym.IMAGE_PROCESSING,
+                    name=ExecutionUnitTagName.NATURAL_LANGUAGE_PROCESSING,
+                    acronym=ExecutionUnitTagAcronym.NATURAL_LANGUAGE_PROCESSING,
                 ),
             ],
             has_ai=False,
@@ -80,8 +83,13 @@ class MyService(Service):
         # ... do something with the raw data
 
         # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
+        parameters = json.loads(data['parameters'].data)
+        audio_wav = tts_calls.tts(parameters)
+        print(f'wav: {audio_wav}')
+        audio_mp3 = AudioSegment.from_file(BytesIO(audio_wav))
+
         return {
-            "result": TaskData(data=..., type=FieldDescriptionType.APPLICATION_JSON)
+            "result": TaskData(data=audio_mp3.export(format='mp3').read(), type=FieldDescriptionType.AUDIO_MP3)
         }
 
 
@@ -136,18 +144,22 @@ async def lifespan(app: FastAPI):
 
 
 # TODO: 6. CHANGE THE API DESCRIPTION AND SUMMARY
-api_description = """My service
-bla bla bla...
+api_description = """Text to Speech
+    Queries an API based on Edge-TTS and returns an audio file based on user-submitted text.
+    The entry must be a json file contains the following fields:
+    input: the text to be transcribed
+    (optional) voice: open-API voice names. Default voice is in french
+    (optional) speed: playback speed (0.25 to 4.0)
 """
-api_summary = """My service
-bla bla bla...
+api_summary = """Text to Speech
+    Queries an API based on Edge-TTS and returns an audio file based on user-submitted text.
 """
 
 # Define the FastAPI application with information
 # TODO: 7. CHANGE THE API TITLE, VERSION, CONTACT AND LICENSE
 app = FastAPI(
     lifespan=lifespan,
-    title="Sample Service API.",
+    title="Text to Speech API.",
     description=api_description,
     version="0.0.1",
     contact={

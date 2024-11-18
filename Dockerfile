@@ -13,6 +13,8 @@ COPY ./requirements.txt .
 COPY ./requirements-all.txt .
 
 # Install dependencies
+RUN apt update
+RUN apt install -y ffmpeg libavcodec-extra
 RUN pip install --requirement requirements.txt --requirement requirements-all.txt
 
 # Copy sources
