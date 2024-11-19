@@ -6,6 +6,9 @@ env:
   ## Common environment variables
   # Service name (must be lowercase and not contain any spaces)
   SERVICE_NAME: ${{ vars.SERVICE_NAME }}
+  # TTS API key and URL
+  TTS_API_KEY: ${{ secrets.TTS_API_KEY }}
+  TTS_API_URL: ${{ vars.TTS_API_URL }}
 
   ## Development environment variables
   # The URLs of the Core Engine to which the service should connect
@@ -134,6 +137,16 @@ jobs:
           engine-announce-retries: ${{ env.DEV_ENGINE_ANNOUNCE_RETRIES }}
           engine-announce-retry-delay: ${{ env.DEV_ENGINE_ANNOUNCE_RETRY_DELAY }}
 
+      - name: Add TTS API Key and URL to ConfigMap
+        shell: bash
+        working-directory: ./kubernetes
+        env:
+          TTS_API_KEY: ${{ secrets.TTS_API_KEY }}
+          TTS_API_URL: ${{ vars.TTS_API_URL }}
+        run: |
+          yq -i ".data.TTS_API_KEY = \"${TTS_API_KEY}\"" config-map.yml
+          yq -i ".data.TTS_API_URL = \"${TTS_API_URL}\"" config-map.yml
+
       - name: Remove unnecessary keys from configuration files
         uses: swiss-ai-center/common-code/.github/actions/remove-unnecessary-keys-from-kubernetes-configuration-files@main
         with:
@@ -180,6 +193,16 @@ jobs:
           max-tasks: ${{ env.PROD_MAX_TASKS }}
           engine-announce-retries: ${{ env.PROD_ENGINE_ANNOUNCE_RETRIES }}
           engine-announce-retry-delay: ${{ env.PROD_ENGINE_ANNOUNCE_RETRY_DELAY }}
+
+      - name: Add TTS API Key and URL to ConfigMap
+        shell: bash
+        working-directory: ./kubernetes
+        env:
+          TTS_API_KEY: ${{ secrets.TTS_API_KEY }}
+          TTS_API_URL: ${{ vars.TTS_API_URL }}
+        run: |
+          yq -i ".data.TTS_API_KEY = \"${TTS_API_KEY}\"" config-map.yml
+          yq -i ".data.TTS_API_URL = \"${TTS_API_URL}\"" config-map.yml
 
       - name: Deploy service on the Kubernetes cluster
         uses: swiss-ai-center/common-code/.github/actions/execute-command-on-kubernetes-cluster@main

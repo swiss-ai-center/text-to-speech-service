@@ -1,9 +1,10 @@
 import requests as r
+import os
 
-url = "https://openai-edge-tts.kube.isc.heia-fr.ch"
+url = os.getenv("TTS_API_URL")
 tts_endpoint = "/v1/audio/speech"
 
-api_key = "your_api_key_here"
+api_key = os.getenv("TTS_API_KEY")
 
 
 def tts(json_parameters):
