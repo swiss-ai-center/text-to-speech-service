@@ -38,7 +38,7 @@ class MyService(Service):
 
     def __init__(self):
         super().__init__(
-            name="Text to Speech",
+            name="Text To Speech",
             slug="text-to-speech",
             url=settings.service_url,
             summary=api_summary,
@@ -63,24 +63,19 @@ class MyService(Service):
                     acronym=ExecutionUnitTagAcronym.NATURAL_LANGUAGE_PROCESSING,
                 ),
             ],
-            has_ai=False,
-            # OPTIONAL: CHANGE THE DOCS URL TO YOUR SERVICE'S DOCS
-            docs_url="https://docs.swiss-ai-center.ch/reference/core-concepts/service/",
+            has_ai=True,
+            docs_url="https://docs.swiss-ai-center.ch/reference/services/text-to-speech/",
         )
         self._logger = get_logger(settings)
 
     def process(self, data):
         # NOTE that the data is a dictionary with the keys being the field names set in the data_in_fields
         # The objects in the data variable are always bytes. It is necessary to convert them to the desired type
-        # before using them.
-        # raw = data["image"].data
-        # input_type = data["image"].type
-        # ... do something with the raw data
 
-        # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
         parameters = json.loads(data['parameters'].data)
         audio_wav = tts_calls.tts(parameters)
-        print(f'wav: {audio_wav}')
+
+        # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
         audio_mp3 = AudioSegment.from_file(BytesIO(audio_wav))
 
         return {
@@ -138,15 +133,14 @@ async def lifespan(app: FastAPI):
         await service_service.graceful_shutdown(my_service, engine_url)
 
 
-api_description = """Text to Speech
-    Queries an API based on Edge-TTS and returns an audio file based on user-submitted text.
-    The entry must be a json file contains the following fields:
-    input: the text to be transcribed
-    (optional) voice: open-API voice names. Default voice is in french
-    (optional) speed: playback speed (0.25 to 4.0)
+api_description = """
+Queries an online API based on Edge-TTS and returns an audio file based on user-submitted text.
+The entry must be a JSON file containing the following fields:
+- input: the text to be converted to speech
+- (optional) voice: Open AI voice names (https://tts.travisvn.com/). Default voice is in french
+- (optional) speed: playback speed (0.25 to 4.0). Default speed is 1.0
 """
-api_summary = """Text to Speech
-    Queries an API based on Edge-TTS and returns an audio file based on user-submitted text.
+api_summary = """Queries an online API based on Edge-TTS and returns an audio file based on user-submitted text.
 """
 
 # Define the FastAPI application with information
