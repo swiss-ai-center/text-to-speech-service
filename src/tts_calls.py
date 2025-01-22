@@ -2,7 +2,7 @@ import requests as r
 import os
 
 url = os.getenv("TTS_API_URL")
-tts_endpoint = "/v1/audio/speech"
+tts_endpoint = "/audio/speech"
 
 api_key = os.getenv("TTS_API_KEY")
 
