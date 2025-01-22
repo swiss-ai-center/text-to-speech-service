@@ -137,7 +137,7 @@ api_description = """
 Queries an online API based on Edge-TTS and returns an audio file based on user-submitted text.
 The entry must be a JSON file containing the following fields:
 - input: the text to be converted to speech
-- (optional) voice: Open AI voice names (https://tts.travisvn.com/). Default voice is in french
+- (optional) voice: [Open AI voice names](https://tts.travisvn.com/). Default voice is in french
 - (optional) speed: playback speed (0.25 to 4.0). Default speed is 1.0
 """
 api_summary = """Queries an online API based on Edge-TTS and returns an audio file based on user-submitted text.
