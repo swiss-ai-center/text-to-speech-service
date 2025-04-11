@@ -74,9 +74,9 @@ class MyService(Service):
 
         parameters = json.loads(data['parameters'].data)
         audio_wav = tts_calls.tts(parameters)
-
+        self._logger.debug("here")
         # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
-        audio_mp3 = AudioSegment.from_file(BytesIO(audio_wav))
+        audio_mp3 = AudioSegment.from_file(BytesIO(audio_wav), format="mp3")
 
         return {
             "result": TaskData(data=audio_mp3.export(format='mp3').read(), type=FieldDescriptionType.AUDIO_MP3)
