@@ -23,8 +23,17 @@ import tts_calls
 from pydub import AudioSegment
 from io import BytesIO
 import json
+from mutagen import File as MutagenFile
 
 settings = get_settings()
+
+
+def detect_audio_format(data: bytes) -> str:
+    temp = BytesIO(data)
+    audio = MutagenFile(temp)
+    if audio is None:
+        raise ValueError("Unsupported audio format")
+    return audio.mime[0].split("/")[-1]  # returns 'mp3', 'wav', etc.
 
 
 class MyService(Service):
@@ -73,13 +82,13 @@ class MyService(Service):
         # The objects in the data variable are always bytes. It is necessary to convert them to the desired type
 
         parameters = json.loads(data['parameters'].data)
-        audio_wav = tts_calls.tts(parameters)
-        self._logger.debug("here")
+        audio_raw_mp3 = tts_calls.tts(parameters)
+
         # NOTE that the result must be a dictionary with the keys being the field names set in the data_out_fields
-        audio_mp3 = AudioSegment.from_file(BytesIO(audio_wav), format="mp3")
+        audio = AudioSegment.from_file(BytesIO(audio_raw_mp3), format=detect_audio_format(audio_raw_mp3))
 
         return {
-            "result": TaskData(data=audio_mp3.export(format='mp3').read(), type=FieldDescriptionType.AUDIO_MP3)
+            "result": TaskData(data=audio.export(format='mp3').read(), type=FieldDescriptionType.AUDIO_MP3)
         }
 
 
