@@ -89,4 +89,3 @@ class MyService(Service):
         return {
             "result": TaskData(data=audio.export(format='mp3').read(), type=FieldDescriptionType.AUDIO_MP3)
         }
-
